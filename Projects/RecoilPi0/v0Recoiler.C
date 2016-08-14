@@ -51,17 +51,14 @@ void Recoiler::SlaveBegin(TTree * /*tree*/)
 
    THSOutput::HSSlaveBegin(fInput,fOutput);
   //if you want kinematic bins you must define fHisbins here
-   fHisbins=new TH1F("Bins","Bins",10,300,1300);
+   //fHisbins=new TH*()
    if(fHisbins) fOutput->Add(fHisbins);
-   fHisbins->SetXTitle("Eg");//give useful axis name
+   //fHisbins->SetXTitle();//give useful axis name
    //fHisbins->SetYTitle();//give useful axis name
    THSHisto::ChangeNames();
    THSHisto::LoadCut("Cut1");
-   THSHisto::LoadCut("ProtonPrompt");
-   THSHisto::LoadCut("NeutronPrompt");
-   THSHisto::LoadCut("ProtonRandom");
-   THSHisto::LoadCut("NeutronRandom");
-  
+   THSHisto::LoadCut("Proton");
+   THSHisto::LoadCut("Neutron");
   // THSHisto::LoadCut("ProtonEsum>60");
   // THSHisto::LoadCut("NeutronEsum>60");
   // THSHisto::LoadCut("ProtonEsum>80");
@@ -134,7 +131,7 @@ if (p4Participant.X() == 0 && p4Participant.Y() == 0 && p4Participant.Z() == 0 &
 
 
    Double_t protonLabEnergy = CalcQFThreeBodyRecoilPartT(beamEnergy, p4Pion, p4Participant, massTarget, massProton, massNeutron);
-   TLorentzVector p4Proton =  p4Participant;		
+   TLorentzVector p4Proton =  p4Participant;		//Why are some of these 0,0,0 in the Vector but have E.
    p4Proton.SetE(protonLabEnergy);
 //HERE REMEMBER THE PID PHI has -1 if no pid hit
 
@@ -146,6 +143,20 @@ if (p4Participant.X() == 0 && p4Participant.Y() == 0 && p4Participant.Z() == 0 &
    pionPhi = (boostedPion.Phi())*TMath::RadToDeg();; //This vs Ebeam.
    Double_t protonCMAngle = (boostedProton.Angle(CMvec.Vect()))*TMath::RadToDeg();; 
 
+//   if (pionCMAngle == 0){
+
+   //std::cout<<"CmvecX " << boostedPion.X()<<" CmvecY " << boostedPion.Y()<<" CmvecZ " << boostedPion.Z() <<std::endl;
+
+
+//  TVector3 CMTest1;
+//  CMTest1.SetXYZ(CMvec.X(),CMvec.Y(),CMvec.Z());
+//  TVector3 CMTest2;
+//  CMTest2.SetXYZ(boostedPion.X(),boostedPion.Y(),boostedPion.Z());
+
+//  Double_t CMTestAngle = CMTest2.Angle(CMTest1)*TMath::RadToDeg();
+ // std::cout<<" Cmangletest " << p4Proton.X() << "  " << p4Proton.Y() << "  " << p4Proton.Z() << " Energy-> " << p4Proton.E() << "  " << p4Proton.Phi()<< "  " << p4Proton.Theta() <<" change " << p4Pion.X()<< "  " << p4Pion.Y()<< "  " << p4Pion.Z()<< "  " << p4Pion.E()  <<std::endl;
+
+//}
   //Pid coincidence
   
   Double_t pidPhiDiff =Phidiff_ ;
@@ -160,7 +171,7 @@ if (p4Participant.X() == 0 && p4Participant.Y() == 0 && p4Participant.Z() == 0 &
   chamber1_Vec.SetXYZ(Chamber1_fX,Chamber1_fY,Chamber1_fZ);
   chamber2_Vec.SetXYZ(Chamber2_fX,Chamber2_fY,Chamber2_fZ); //These are the same.
 
-  chamber2_Vec.RotateZ(-1.2*TMath::DegToRad());
+
 
 if (chamber1_Vec.X() > -990 ){
   chamber1Theta  = chamber1_Vec.Theta()*TMath::RadToDeg();
@@ -180,6 +191,7 @@ else{
   chamber1Theta  = -1000;
   pVector1.SetXYZ(-1000,-1000,-1000);
   pVector2.SetXYZ(-1000,-1000,-1000);
+//These are the vector which will go into Reconstruct. 
   angleWCProton =-1000;
   phiProtonWC = -1000;
   phiWC = -1000;
@@ -193,56 +205,100 @@ else{
 
 
 
+//For all do 60,80,100,120 cuts in Esum, do prot and neut for all, if greater Esum than 60 etc for both proton and neut
+
   Double_t Esum = ESum_;
   Double_t TagTime = TaggedTime_;
 
-   Int_t kinBin=GetKinBin(Ebeam_);//if fHisbins is defined need to give this meaningful arguments
-
+//How do I do plots of one var vs the other. for WC1theta vs scatteredPhi and pionCMAngle vs Ebeam. 
 
 if (chamber1Theta>-1000){
 
-//PionPhi cuts
-if ( ((-p4Pion).Phi()*TMath::RadToDeg()-phiWC) < -30 || ((-p4Pion).Phi()*TMath::RadToDeg() -phiWC) > 30    ){
-	return kTRUE;
-}
-
-
-if (  ((-p4Pion).Phi()*TMath::RadToDeg() -phiProtonWC) < -30 ||  ((-p4Pion).Phi()*TMath::RadToDeg() -phiProtonWC)  > 30  ){
-	return kTRUE;
-}
-
-if ( (phiWC - phiProtonWC) < -50 || (phiWC - phiProtonWC) > 50    ){
-
-	return kTRUE;
-}
-
-
-
-   FillHistograms("Cut1",kinBin);
- if (TagTime < 25 && TagTime > -25){
+   FillHistograms("Cut1",0);
+ if (TagTime < 25 && TagTime > -5){
 
   if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
 
-   FillHistograms("ProtonPrompt",kinBin);
+   FillHistograms("Proton",0);
+//  if (Esum > 60){
+//     FillHistograms("ProtonEsum>60",0);
+//} //Esum60
+// if (Esum > 80){
+//     FillHistograms("ProtonEsum>80",0);
+//} //Esum80
+// if (Esum > 100){
+//     FillHistograms("ProtonEsum>100",0);
+//} //Esum 100
+// if (Esum > 120){
+//     FillHistograms("ProtonEsum>120",0);
+//} //Esum 120
 
 }//pidphidiff if close
 
   else{
- FillHistograms("NeutronPrompt",kinBin);
+ FillHistograms("Neutron",0);
+// if (Esum > 60){
+//     FillHistograms("NeutronEsum>60",0);
+//} //Esum 60
+
+//if (Esum > 80){
+//   FillHistograms("NeutronEsum>80",0);
+//} //Esum 80
+
+
+//if (Esum > 100){
+//   FillHistograms("NeutronEsum>100",0);
+//} //Esum100
+
+//if (Esum > 120){
+//   FillHistograms("NeutronEsum>120",0);
+
+//} // Esum 120
 
 } //pid phi else close
 
 } // TagTime if close 
 
-else if(TagTime < 90 && TagTime > 40 || TagTime > -90 && TagTime < -40 ){
+else{
   if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
 
-   FillHistograms("ProtonRandom",kinBin);
+   FillHistograms("Proton",0);
+//  if (Esum > 60){
+//     FillHistograms("ProtonEsum>60",0);
+
+//}  //Esum 60
+  
+// if (Esum > 80){
+//     FillHistograms("ProtonEsum>80",0);
+//} //Esum 80
+// if (Esum > 100){
+//     FillHistograms("ProtonEsum>100",0);
+//} //Esum100
+// if (Esum > 120){
+//     FillHistograms("ProtonEsum>120",0);
+//} //Esum 120
 
 }//pidphidiff if close
 
   else{
- FillHistograms("NeutronRandom",kinBin);
+ FillHistograms("Neutron",0);
+// if (Esum > 60){
+//     FillHistograms("NeutronEsum>60",0);
+//} //Esum 60
+
+//if (Esum > 80){
+//   FillHistograms("NeutronEsum>80",0);
+//} //Esum 80
+
+
+//if (Esum > 100){
+//   FillHistograms("NeutronEsum>100",0);
+//} //Esum 100
+
+//if (Esum > 120){
+//   FillHistograms("NeutronEsum>120",0);
+
+//}//Esum 120
 
 
 } // pidphi else close
@@ -252,10 +308,18 @@ else if(TagTime < 90 && TagTime > 40 || TagTime > -90 && TagTime < -40 ){
 } //close chamber1theta
 
 
+//PionCMAngle vs Ebeam
+
+   //FillHistograms("pionCMAngle",0);
+
+//   FillHistograms("",0);
+//   FillHistograms("NeutronEsum>120",0);
+
+
 
    //Int_t kinBin=GetKinBin();//if fHisbins is defined need to give this meaningful arguments
    //FillHistograms("Cut1",kinBin);
-   FillHistograms("Cut1",kinBin);
+   FillHistograms("Cut1",0);
    //EnterKinBinList(kinBin,entry);//save evente in kinematic bins entry lists
    THSOutput::HSProcessFill(); 
 
@@ -297,17 +361,6 @@ void Recoiler::HistogramList(TString sLabel){
   fOutput->Add(MapHist(new TH1F("angleWCProton"+sLabel,"angleWCProton"+sLabel,100,0,180)));
   fOutput->Add(MapHist(new TH1F("phiProtonWC"+sLabel,"Phi_{ProtonUsingWC1}"+sLabel,100,-180,180)));
   fOutput->Add(MapHist(new TH1F("phiWC"+sLabel,"phi_{WC}"+sLabel,100,-180,180)));
-  fOutput->Add(MapHist(new TH1F("pionPhi"+sLabel,"pionPhi"+sLabel,100,-180,180))); 
-
-  fOutput->Add(MapHist(new TH1F("pionPhiVsphiWC"+sLabel,"pionPhiVsphiWC"+sLabel,1000,-180,180))); 
-  fOutput->Add(MapHist(new TH1F("pionPhiVsphiProtonWC"+sLabel,"pionPhiVsphiProtonWC"+sLabel,1000,-180,180))); 
-  fOutput->Add(MapHist(new TH1F("phiWCVsphiProtonWC"+sLabel,"phiWCVsphiProtonWC"+sLabel,1000,-180,180))); 
-
-
-//  fOutput->Add(MapHist(new TH1F("pVector2X"+sLabel,"pVector2X"+sLabel,1000,-400,400))); 
-//  fOutput->Add(MapHist(new TH1F("pVector2Y"+sLabel,"pVector2Y"+sLabel,1000,-400,400))); 
-//  fOutput->Add(MapHist(new TH1F("pVector2Z"+sLabel,"pVector2Z"+sLabel,1000,-400,400))); 
-
 
   TDirectory::AddDirectory(kTRUE); //back to normal
 }
@@ -328,17 +381,4 @@ void Recoiler::FillHistograms(TString sCut,Int_t bin){
   FindHist("angleWCProton")->Fill(angleWCProton);
   FindHist("phiProtonWC")->Fill(phiProtonWC);
   FindHist("phiWC")->Fill(phiWC);
-  FindHist("pionPhi")->Fill(p4Pion.Phi()*TMath::RadToDeg());
-
-  ((TH1F*)FindHist("pionPhiVsphiWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiWC);
-  ((TH1F*)FindHist("pionPhiVsphiProtonWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiProtonWC);
-  ((TH1F*)FindHist("phiWCVsphiProtonWC"))->Fill(phiWC - phiProtonWC);
-
-
-//  ((TH1F*)FindHist("pVector2X"))->Fill(pVector2.X());
-//  ((TH1F*)FindHist("pVector2Y"))->Fill(pVector2.Y());
-//  ((TH1F*)FindHist("pVector2Z"))->Fill(pVector2.X());
 }
-
-
-

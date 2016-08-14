@@ -108,7 +108,7 @@ Bool_t Recoiler::Process(Long64_t entry)
 
    Double_t beamEnergy = Ebeam_;
    TVector3 targetPosition;
-   targetPosition.SetXYZ(0.,0.,0.);   //NEEDS CHANGING since target cell is moved like -6.5cm, see wc.dat files see a2geant.
+   targetPosition.SetXYZ(0.,0.,-6.5);   //NEEDS CHANGING since target cell is moved like -6.5cm, see wc.dat files see a2geant.
 
   
    p4Pion.SetPxPyPzE(Pion_fP_fX,Pion_fP_fY,Pion_fP_fZ,Pion_fE);  
@@ -208,30 +208,30 @@ else{
 //For all do 60,80,100,120 cuts in Esum, do prot and neut for all, if greater Esum than 60 etc for both proton and neut
 
   Double_t Esum = ESum_;
-
+  Double_t TagTime = TaggedTime_;
 
 //How do I do plots of one var vs the other. for WC1theta vs scatteredPhi and pionCMAngle vs Ebeam. 
 
 if (chamber1Theta>-1000){
 
    FillHistograms("Cut1",0);
-  if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 degrees is pid element separation.
+ if (TagTime < 25 && TagTime > -5){
+
+  if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
 
    FillHistograms("Proton",0);
   if (Esum > 60){
      FillHistograms("ProtonEsum>60",0);
-
-}
-  
+} //Esum60
  if (Esum > 80){
      FillHistograms("ProtonEsum>80",0);
-}
+} //Esum80
  if (Esum > 100){
      FillHistograms("ProtonEsum>100",0);
-}
+} //Esum 100
  if (Esum > 120){
      FillHistograms("ProtonEsum>120",0);
-}
+} //Esum 120
 
 }//pidphidiff if close
 
@@ -239,24 +239,71 @@ if (chamber1Theta>-1000){
  FillHistograms("Neutron",0);
  if (Esum > 60){
      FillHistograms("NeutronEsum>60",0);
-}
+} //Esum 60
 
 if (Esum > 80){
    FillHistograms("NeutronEsum>80",0);
-}
+} //Esum 80
 
 
 if (Esum > 100){
    FillHistograms("NeutronEsum>100",0);
-}
+} //Esum100
 
 if (Esum > 120){
    FillHistograms("NeutronEsum>120",0);
 
-}
+} // Esum 120
+
+} //pid phi else close
+
+} // TagTime if close 
+
+else{
+  if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
+
+   FillHistograms("Proton",0);
+  if (Esum > 60){
+     FillHistograms("ProtonEsum>60",0);
+
+}  //Esum 60
+  
+ if (Esum > 80){
+     FillHistograms("ProtonEsum>80",0);
+} //Esum 80
+ if (Esum > 100){
+     FillHistograms("ProtonEsum>100",0);
+} //Esum100
+ if (Esum > 120){
+     FillHistograms("ProtonEsum>120",0);
+} //Esum 120
+
+}//pidphidiff if close
+
+  else{
+ FillHistograms("Neutron",0);
+ if (Esum > 60){
+     FillHistograms("NeutronEsum>60",0);
+} //Esum 60
+
+if (Esum > 80){
+   FillHistograms("NeutronEsum>80",0);
+} //Esum 80
 
 
-}//pidphidiff else close
+if (Esum > 100){
+   FillHistograms("NeutronEsum>100",0);
+} //Esum 100
+
+if (Esum > 120){
+   FillHistograms("NeutronEsum>120",0);
+
+}//Esum 120
+
+
+} // pidphi else close
+
+}// TagTime else close
 
 } //close chamber1theta
 

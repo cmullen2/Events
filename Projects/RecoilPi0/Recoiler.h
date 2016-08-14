@@ -13,11 +13,14 @@
 #include <TFile.h>
 #include <TSelector.h>
 #include "THSOutput.h"
+#include "TLorentzVector.h"
+#include "TVector3.h"
+#include "TObject.h"
 
 // Header file for the classes stored in the TTree if any.
-#include "/usr/include/root/TLorentzVector.h"
-#include "/usr/include/root/TObject.h"
-#include "/usr/include/root/TVector3.h"
+//#include "/usr/include/root/TLorentzVector.h"
+//#include "/usr/include/root/TObject.h"
+//#include "/usr/include/root/TVector3.h"
 // Fixed size dimensions of array or collections stored in the TTree if any.
    const Int_t kMaxPion = 1;
    const Int_t kMaxChamber1 = 1;
@@ -88,6 +91,8 @@ public :
    Double_t	   angleWCProton;
    Double_t	   phiProtonWC;
    Double_t	   phiWC;
+   Double_t	   TaggedTime_;
+  	   
 
    // List of branches
    TBranch        *b_Pion_TObject_fUniqueID;   //!
@@ -126,7 +131,7 @@ public :
    TBranch        *b_ProtonCandidate_fP_fZ;   //!
    TBranch        *b_ProtonCandidate_fE;   //!
    TBranch        *b_MissingMass_;   //!
-
+   TBranch	  *b_TaggedTime_;
 
 
 //______________________________________________________________________________
@@ -295,6 +300,8 @@ void Recoiler::Init(TTree *tree)
    fChain->SetBranchAddress("ProtonCandidate.fP.fZ", &ProtonCandidate_fP_fZ, &b_ProtonCandidate_fP_fZ);
    fChain->SetBranchAddress("ProtonCandidate.fE", &ProtonCandidate_fE, &b_ProtonCandidate_fE);
    fChain->SetBranchAddress("MissingMass.", &MissingMass_, &b_MissingMass_);
+   fChain->SetBranchAddress("TaggedTime.", &TaggedTime_, &b_TaggedTime_);
+ 
 }
 
 Bool_t Recoiler::Notify()

@@ -14,11 +14,11 @@
 
 //FileName="/home/chris/Documents/PhD/GoatOut/DeuteriumTarget/ProtonMain/ProtonGood/chrisPhysicsRun/Physics_POL_PPi0_OutputA2SimProtonGood.root";   // The input filename containing the tree
 // FileName="/home/chris/Documents/PhD/GoatOut/DeuteriumTarget/NeutronMain/NeutronGood/chrisPhysicsRun/Physics_POL_PPi0_OutputA2SimNeutronGood.root";   //
- FileName="/home/chris/Documents/PhD/GoatOut/DeuteriumTarget/NeutronMain/NeutronBad/chrisPhysicsRun/Physics_POL_PPi0_OutputA2SimNeutronBad.root";   //
+ FileName="/scratch/chrism/RealData/ChrisGoatOut/Run14920/Physics_CBTaggTAPS_14920.root";   //
 // FileName="/home/chris/Documents/PhD/GoatOut/DeuteriumTarget/ProtonMain/ProtonBad/chrisPhysicsRun/Physics_POL_PPi0_OutputA2SimProtonBad.root";   //
 
  TreeName="Selected";   // The name of the tree
- OutName="OutputRecoilPPi0NeutronBad";   // The name of the output directory or file
+ OutName="OutputBeamTimeRun14920";  //The name of the output directory or file
  SelName="Recoiler";    // The name of the selector to be produced
 
  //IsParent=kTRUE; //use connection with parent tree
