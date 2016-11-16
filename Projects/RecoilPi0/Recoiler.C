@@ -51,12 +51,12 @@ void Recoiler::SlaveBegin(TTree * /*tree*/)
 
    THSOutput::HSSlaveBegin(fInput,fOutput);
   //if you want kinematic bins you must define fHisbins here
-   fHisbins=new TH1F("Bins","Bins",10,300,1300);
+//   fHisbins=new TH2F("Bins","Bins",10,300,1300,2,0,180);
    if(fHisbins) fOutput->Add(fHisbins);
-   fHisbins->SetXTitle("Eg");//give useful axis name
-   //fHisbins->SetYTitle();//give useful axis name
+//   fHisbins->SetXTitle("EBeam");//give useful axis name
+//   fHisbins->SetYTitle("ThetaAngle");//give useful axis name
    THSHisto::ChangeNames();
-   THSHisto::LoadCut("Cut1");
+ //  THSHisto::LoadCut("Cut1");
    THSHisto::LoadCut("ProtonPrompt");
    THSHisto::LoadCut("NeutronPrompt");
    THSHisto::LoadCut("ProtonRandom");
@@ -159,8 +159,12 @@ if (p4Participant.X() == 0 && p4Participant.Y() == 0 && p4Participant.Z() == 0 &
 
   chamber1_Vec.SetXYZ(Chamber1_fX,Chamber1_fY,Chamber1_fZ);
   chamber2_Vec.SetXYZ(Chamber2_fX,Chamber2_fY,Chamber2_fZ); //These are the same.
+//Problem with getting distinct wire chamber hits!!!
 
-  chamber2_Vec.RotateZ(-1.2*TMath::DegToRad());
+  cout << Chamber1_fX <<" Y  " << Chamber1_fY << " Z " << Chamber1_fZ << endl;
+
+
+ // chamber2_Vec.RotateZ(-1.2*TMath::DegToRad()); //*********MUY IMPORTANTE*******
 
 if (chamber1_Vec.X() > -990 ){
   chamber1Theta  = chamber1_Vec.Theta()*TMath::RadToDeg();
@@ -168,8 +172,14 @@ if (chamber1_Vec.X() > -990 ){
   pVector2 = chamber2_Vec - chamber1_Vec; 
 //These are the vector which will go into Reconstruct. 
   angleWCProton = (pVector1.Angle(pVector2))*TMath::RadToDeg();
+ 
+  //secondpVec2 = chamber2_Vec - targetPosition;
+ // secondthetaWC = secondpVec2. ; 
+  
+  thetaProtonWC = (pVector1.Theta())*TMath::RadToDeg();
   phiProtonWC = (pVector1.Phi())*TMath::RadToDeg();
   phiWC = (pVector2.Phi())*TMath::RadToDeg();
+  thetaWC = (pVector2.Theta())*TMath::RadToDeg();
   TVector3 chamberScatterVec =ScatteredVector(pVector1,pVector2);
   scatteredPhi = (chamberScatterVec.Phi())*TMath::RadToDeg();    
   scatteredTheta = chamberScatterVec.Theta()*TMath::RadToDeg();
@@ -181,6 +191,7 @@ else{
   pVector1.SetXYZ(-1000,-1000,-1000);
   pVector2.SetXYZ(-1000,-1000,-1000);
   angleWCProton =-1000;
+  thetaProtonWC = -1000;
   phiProtonWC = -1000;
   phiWC = -1000;
   TVector3 chamberScatterVec;
@@ -193,42 +204,126 @@ else{
 
 
 
-  Double_t Esum = ESum_;
-  Double_t TagTime = TaggedTime_;
 
-   Int_t kinBin=GetKinBin(Ebeam_);//if fHisbins is defined need to give this meaningful arguments
+//if(scatteredTheta >8 && scatteredTheta < 30){
+//if(BeamHelicity_ == 1) {
+//ScatteredWCPhiHel1 = scatteredPhi;
+//ScatteredWCPhiHel0 =-666;
+//}
+
+//else{
+//ScatteredWCPhiHel1 = -666;
+//ScatteredWCPhiHel0 = scatteredPhi ;
+//}
+
+//}
+//else {
+//ScatteredWCPhiHel1 = -2000 ;
+//ScatteredWCPhiHel0 = -2000;
+//}
+
+
+if(chamber1Theta != -1000){
+MarkThetadiff = thetaWC - thetaProtonWC  ;
+MarkPhidiff = phiWC - phiProtonWC  ;
+}
+
+else{
+
+MarkThetadiff = -1000;
+MarkPhidiff = -1000;
+
+}
+
+
+
+//cout << MarkThetadiff << " Phi " << MarkPhidiff << " ThetaWC " << thetaWC << " thetaProtonWC" << thetaProtonWC  <<endl;
+
+//if(scatteredTheta >8 && scatteredTheta < 30){
+//if((MarkThetadiff >5 || MarkThetadiff < -5  )){
+// && (MarkPhidiff>5 || MarkThetadiff <-5) && (MarkThetadiff != -1000 || MarkPhidiff != -1000 )     ){
+//if (MarkPhidiff >5 || MarkPhidiff <-5){
+if (MarkPhidiff != -1000 && MarkThetadiff != -1000){
+
+if(MarkThetadiff >3 ||   MarkThetadiff < -3  ){
+//cout << MarkThetadiff << endl;
+
+//Swapped around the if and so what scatPhiCut should equal
+ScatPhiCut = -2000  ;
+ScatThetaCut = -2000;
+
+//ScatPhiCut = scatteredPhi ;
+//ScatThetaCut = scatteredTheta;
+
+
+if(BeamHelicity_ == 1) {
+ScatteredWCPhiHel1 = scatteredPhi;
+ScatteredWCPhiHel0 =-666;
+}
+
+else{
+ScatteredWCPhiHel1 = -666;
+ScatteredWCPhiHel0 = scatteredPhi ;
+}
+
+}
+}
+//}
+else {
+ScatteredWCPhiHel1 = -2000 ;
+ScatteredWCPhiHel0 = -2000;
+ScatPhiCut = scatteredPhi;
+ScatThetaCut = scatteredTheta;
+}
+
+
+
+
+
+
+
+
+
+Double_t Esum = ESum_;
+Double_t TagTime = TaggedTime_;
+
+Int_t kinBin=GetKinBin(Ebeam_,pionCMAngle);//if fHisbins is defined need to give this meaningful arguments
 
 
 if (chamber1Theta>-1000){
 
 //PionPhi cuts
 if ( ((-p4Pion).Phi()*TMath::RadToDeg()-phiWC) < -30 || ((-p4Pion).Phi()*TMath::RadToDeg() -phiWC) > 30    ){
-	return kTRUE;
+return kTRUE;
 }
 
 
 if (  ((-p4Pion).Phi()*TMath::RadToDeg() -phiProtonWC) < -30 ||  ((-p4Pion).Phi()*TMath::RadToDeg() -phiProtonWC)  > 30  ){
-	return kTRUE;
+return kTRUE;
 }
 
 if ( (phiWC - phiProtonWC) < -50 || (phiWC - phiProtonWC) > 50    ){
 
-	return kTRUE;
+return kTRUE;
 }
 
 
 
-   FillHistograms("Cut1",kinBin);
- if (TagTime < 25 && TagTime > -25){
+// FillHistograms("Cut1",kinBin);
+if (TagTime < 25 && TagTime > -25){
 
-  if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
+if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
 
-   FillHistograms("ProtonPrompt",kinBin);
+//   FillHistograms("ProtonPrompt",kinBin);
+FillHistograms("ProtonPrompt",0);
+
 
 }//pidphidiff if close
 
-  else{
- FillHistograms("NeutronPrompt",kinBin);
+else{
+// FillHistograms("NeutronPrompt",kinBin);
+FillHistograms("NeutronPrompt",0);
+
 
 } //pid phi else close
 
@@ -237,13 +332,16 @@ if ( (phiWC - phiProtonWC) < -50 || (phiWC - phiProtonWC) > 50    ){
 else if(TagTime < 90 && TagTime > 40 || TagTime > -90 && TagTime < -40 ){
   if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
 
-   FillHistograms("ProtonRandom",kinBin);
+//   FillHistograms("ProtonRandom",kinBin);
+   FillHistograms("ProtonRandom",0);
+
 
 }//pidphidiff if close
 
-  else{
- FillHistograms("NeutronRandom",kinBin);
 
+  else{
+// FillHistograms("NeutronRandom",kinBin);
+ FillHistograms("NeutronRandom",0);
 
 } // pidphi else close
 
@@ -253,9 +351,9 @@ else if(TagTime < 90 && TagTime > 40 || TagTime > -90 && TagTime < -40 ){
 
 
 
-   //Int_t kinBin=GetKinBin();//if fHisbins is defined need to give this meaningful arguments
+ //  Int_t kinBin=GetKinBin();//if fHisbins is defined need to give this meaningful arguments
    //FillHistograms("Cut1",kinBin);
-   FillHistograms("Cut1",kinBin);
+ //  FillHistograms("Cut1",kinBin);
    //EnterKinBinList(kinBin,entry);//save evente in kinematic bins entry lists
    THSOutput::HSProcessFill(); 
 
@@ -287,21 +385,39 @@ void Recoiler::HistogramList(TString sLabel){
   // e.g fOutput->Add(MapHist(new TH1F("Mp1"+sLabel,"M_{p1}"+sLabel,100,0,2)));
   //end of histogram list
 
-  fOutput->Add(MapHist(new TH1F("InvMass"+sLabel,"M_{Inv}"+sLabel,100,100,250)));
-  fOutput->Add(MapHist(new TH1F("MissingMass"+sLabel,"M_{mass}"+sLabel,100,1800,2100)));
-  fOutput->Add(MapHist(new TH1F("pionCMAngle"+sLabel,"Pion_{CMAngle}"+sLabel,1000,0,250)));
-  fOutput->Add(MapHist(new TH2F("pionCMAngleVsE"+sLabel,"Pion_{CMAngle}VsE"+sLabel,100,0,180,100,0,1500)));  //6 rather than 3 ints. see browser
-  fOutput->Add(MapHist(new TH2F("ScatteredPhiVWCTheta"+sLabel,"PhiVsTheta_{ScatteredVsWC}"+sLabel,100,-180,180,100,0,180)));  
-  fOutput->Add(MapHist(new TH2F("pionPhiVsE"+sLabel,"pionPhiVsE"+sLabel,100,-180,180,100,0,1500))); 
-  fOutput->Add(MapHist(new TH2F("ScatteredPhiVScatTheta"+sLabel,"PhiVsTheta_{Scattered}"+sLabel,100,-180,180,100,0,180)));  
-  fOutput->Add(MapHist(new TH1F("angleWCProton"+sLabel,"angleWCProton"+sLabel,100,0,180)));
-  fOutput->Add(MapHist(new TH1F("phiProtonWC"+sLabel,"Phi_{ProtonUsingWC1}"+sLabel,100,-180,180)));
-  fOutput->Add(MapHist(new TH1F("phiWC"+sLabel,"phi_{WC}"+sLabel,100,-180,180)));
-  fOutput->Add(MapHist(new TH1F("pionPhi"+sLabel,"pionPhi"+sLabel,100,-180,180))); 
+//  fOutput->Add(MapHist(new TH1F("InvMass"+sLabel,"M_{Inv}"+sLabel,100,100,250)));
+//  fOutput->Add(MapHist(new TH1F("MissingMass"+sLabel,"M_{mass}"+sLabel,100,1700,2100)));
+//  fOutput->Add(MapHist(new TH1F("pionCMAngle"+sLabel,"Pion_{CMAngle}"+sLabel,1000,0,250)));
+//  fOutput->Add(MapHist(new TH2F("pionCMAngleVsE"+sLabel,"Pion_{CMAngle}VsE"+sLabel,100,0,180,100,0,1500)));  //6 rather than 3 ints. see browser
+  fOutput->Add(MapHist(new TH2F("ScatteredPhiVWCTheta"+sLabel,"PhiVsTheta_{ScatteredVsWC}"+sLabel,1000,-180,180,1000,0,180)));  
+//  fOutput->Add(MapHist(new TH2F("pionPhiVsE"+sLabel,"pionPhiVsE"+sLabel,1000,-180,180,1000,0,1500))); 
+  fOutput->Add(MapHist(new TH2F("ScatteredPhiVScatTheta"+sLabel,"PhiVsTheta_{Scattered}"+sLabel,1000,-180,180,1000,0,180)));  
+//  fOutput->Add(MapHist(new TH1F("angleWCProton"+sLabel,"angleWCProton"+sLabel,100,0,180)));
+//  fOutput->Add(MapHist(new TH1F("phiProtonWC"+sLabel,"Phi_{ProtonUsingWC1}"+sLabel,100,-180,180)));
+//  fOutput->Add(MapHist(new TH1F("phiWC"+sLabel,"phi_{WC}"+sLabel,100,-180,180)));
+//  fOutput->Add(MapHist(new TH1F("pionPhi"+sLabel,"pionPhi"+sLabel,100,-180,180))); 
 
-  fOutput->Add(MapHist(new TH1F("pionPhiVsphiWC"+sLabel,"pionPhiVsphiWC"+sLabel,1000,-180,180))); 
-  fOutput->Add(MapHist(new TH1F("pionPhiVsphiProtonWC"+sLabel,"pionPhiVsphiProtonWC"+sLabel,1000,-180,180))); 
-  fOutput->Add(MapHist(new TH1F("phiWCVsphiProtonWC"+sLabel,"phiWCVsphiProtonWC"+sLabel,1000,-180,180))); 
+//  fOutput->Add(MapHist(new TH1F("pionPhiVsphiWC"+sLabel,"pionPhiVsphiWC"+sLabel,1000,-180,180))); 
+//  fOutput->Add(MapHist(new TH1F("pionPhiVsphiProtonWC"+sLabel,"pionPhiVsphiProtonWC"+sLabel,1000,-180,180))); 
+//  fOutput->Add(MapHist(new TH1F("phiWCVsphiProtonWC"+sLabel,"phiWCVsphiProtonWC"+sLabel,1000,-180,180))); 
+
+
+ // fOutput->Add(MapHist(new TH1F("ScatteredNucleonPhiHel1"+sLabel,"ScatteredNucleonPhiHel1"+sLabel,1000,-180,180))); 
+//  fOutput->Add(MapHist(new TH1F("ScatteredWCPhiHel1"+sLabel,"ScatteredWCPhiHel1"+sLabel,20,-180,180))); 
+ // fOutput->Add(MapHist(new TH1F("ScatteredNucleonPhiHel0"+sLabel,"ScatteredNucleonPhiHel0"+sLabel,1000,-180,180))); 
+//  fOutput->Add(MapHist(new TH1F("ScatteredWCPhiHel0"+sLabel,"ScatteredWCPhiHel0"+sLabel,20,-180,180))); 
+
+
+//  fOutput->Add(MapHist(new TH1F("MarkThetadiff"+sLabel,"MarkThetadiff"+sLabel,20,-200,200))); 
+//  fOutput->Add(MapHist(new TH1F("MarkPhidiff"+sLabel,"MarkPhidiff"+sLabel,20,-50,50))); 
+//  fOutput->Add(MapHist(new TH1F("thetaWC"+sLabel,"thetaWC"+sLabel,20,0,180))); 
+//  fOutput->Add(MapHist(new TH1F("phiWCagain"+sLabel,"phiWCagain"+sLabel,20,-180,180))); 
+//  fOutput->Add(MapHist(new TH1F("thetaProtonWC"+sLabel,"thetaProtonWC"+sLabel,20,0,180))); 
+//  fOutput->Add(MapHist(new TH1F("phiProtonWCagain"+sLabel,"phiProtonWCagain"+sLabel,20,-180,180))); 
+
+  fOutput->Add(MapHist(new TH2F("MarkThetadiffVsMarkPhidiff"+sLabel,"Thetadiff_{Mark}VsPhidiff_{Mark}"+sLabel,1000,-180,180,1000,-60,60)));  //6 rather than 3 ints. see browser
+
+  fOutput->Add(MapHist(new TH2F("ScatPhiCutVsScatThetaCut"+sLabel,"ScatPhiVsScatTheta"+sLabel,1000,-180,180,1000,0,180)));  //6 rather than 3 ints. see browser
 
 
 //  fOutput->Add(MapHist(new TH1F("pVector2X"+sLabel,"pVector2X"+sLabel,1000,-400,400))); 
@@ -318,22 +434,41 @@ void Recoiler::FillHistograms(TString sCut,Int_t bin){
   //Fill histogram
   // e.g. FindHist("Mp1")->Fill(fp1->M());
 
-  FindHist("InvMass")->Fill(Inv_Mass_Pion_);
-  FindHist("MissingMass")->Fill(MissingMass_);
-  FindHist("pionCMAngle")->Fill(pionCMAngle);
-  ((TH2F*)FindHist("pionCMAngleVsE"))->Fill(pionCMAngle,Ebeam_);
+//  FindHist("InvMass")->Fill(Inv_Mass_Pion_);
+//  FindHist("MissingMass")->Fill(MissingMass_);
+//  FindHist("pionCMAngle")->Fill(pionCMAngle);
+//  ((TH2F*)FindHist("pionCMAngleVsE"))->Fill(pionCMAngle,Ebeam_);
   ((TH2F*)FindHist("ScatteredPhiVWCTheta"))->Fill(scatteredPhi,chamber1Theta);
-  ((TH2F*)FindHist("pionPhiVsE"))->Fill(p4Pion.Phi()*TMath::RadToDeg(),Ebeam_);
+//  ((TH2F*)FindHist("pionPhiVsE"))->Fill(p4Pion.Phi()*TMath::RadToDeg(),Ebeam_);
   ((TH2F*)FindHist("ScatteredPhiVScatTheta"))->Fill(scatteredPhi,scatteredTheta);
-  FindHist("angleWCProton")->Fill(angleWCProton);
-  FindHist("phiProtonWC")->Fill(phiProtonWC);
-  FindHist("phiWC")->Fill(phiWC);
-  FindHist("pionPhi")->Fill(p4Pion.Phi()*TMath::RadToDeg());
+//  FindHist("angleWCProton")->Fill(angleWCProton);
+//  FindHist("phiProtonWC")->Fill(phiProtonWC);
+//  FindHist("phiWC")->Fill(phiWC);
+//  FindHist("pionPhi")->Fill(p4Pion.Phi()*TMath::RadToDeg());
 
-  ((TH1F*)FindHist("pionPhiVsphiWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiWC);
-  ((TH1F*)FindHist("pionPhiVsphiProtonWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiProtonWC);
-  ((TH1F*)FindHist("phiWCVsphiProtonWC"))->Fill(phiWC - phiProtonWC);
+//  ((TH1F*)FindHist("pionPhiVsphiWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiWC);
+//  ((TH1F*)FindHist("pionPhiVsphiProtonWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiProtonWC);
+//  ((TH1F*)FindHist("phiWCVsphiProtonWC"))->Fill(phiWC - phiProtonWC);
 
+
+
+//  FindHist("ScatteredNucleonPhiHel1")->Fill();
+//  FindHist("ScatteredWCPhiHel1")->Fill(ScatteredWCPhiHel1);
+  
+ // FindHist("ScatteredNucleonPhiHel0")->Fill();
+//  FindHist("ScatteredWCPhiHel0")->Fill(ScatteredWCPhiHel0);
+
+
+//  FindHist("MarkThetadiff")->Fill(MarkThetadiff);
+//  FindHist("MarkPhidiff")->Fill(MarkPhidiff);
+//  FindHist("thetaWC")->Fill(thetaWC);
+//  FindHist("phiWCagain")->Fill(phiWC);
+//  FindHist("thetaProtonWC")->Fill(thetaProtonWC);
+//  FindHist("phiProtonWCagain")->Fill(phiProtonWC);
+ 
+  ((TH2F*)FindHist("MarkThetadiffVsMarkPhidiff"))->Fill(MarkThetadiff,MarkPhidiff);
+
+  ((TH2F*)FindHist("ScatPhiCutVsScatThetaCut"))->Fill(ScatPhiCut,ScatThetaCut);
 
 //  ((TH1F*)FindHist("pVector2X"))->Fill(pVector2.X());
 //  ((TH1F*)FindHist("pVector2Y"))->Fill(pVector2.Y());

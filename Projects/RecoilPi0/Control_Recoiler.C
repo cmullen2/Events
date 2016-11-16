@@ -3,14 +3,15 @@
    TChain* tree=new TChain("Selected","datachain");
   // tree->Add("/home/chris/Documents/PhD/GoatOut/DeuteriumTarget/ProtonMain/ProtonGood/chrisPhysicsRun/Physics_POL_PPi0_OutputA2SimProtonGood.root");
    //tree->Add("/home/chris/Documents/PhD/GoatOut/DeuteriumTarget/NeutronMain/NeutronGood/chrisPhysicsRun/Physics_POL_PPi0_OutputA2SimNeutronGood.root");
-   tree->Add("/scratch/chrism/RealData/ChrisGoatOut/Run14920/Physics_CBTaggTAPS_14920.root");
-  
-   tree->Add("/scratch/chrism/RealData/ChrisGoatOut/Run14922/Physics_CBTaggTAPS_14922.root");
-   tree->Add("/scratch/chrism/RealData/ChrisGoatOut/Run14917/Physics_CBTaggTAPS_14917.root");
+  //tree->Add("/scratch/chris/RealData/ChrisGoatOut/Moeller/Physics_CBTaggTAPS_14920.root");
+ //   tree->Add("/scratch/chris/RealData/ChrisGoatOut/Perp/Physics_CBTaggTAPS_*");
+     tree->Add("/w/work14/chris/Run101016/ChrisOutput/Para/Physics_CBTaggTAPS_14961.root");
+//  tree->Add("/scratch/chrism/RealData/ChrisGoatOut/Run14922/Physics_CBTaggTAPS_14922.root");
+ //  tree->Add("/scratch/chrism/RealData/ChrisGoatOut/Run14917/Physics_CBTaggTAPS_14917.root");
  //tree->Add("/home/chris/Documents/PhD/GoatOut/DeuteriumTarget/ProtonMain/ProtonBad/chrisPhysicsRun/Physics_POL_PPi0_OutputA2SimProtonBad.root");
    //Set the ouput directory or file (if full file name is given just 1 file is created, while if a directory it will be created and filled with files of the same name as the input 
    gSystem->Setenv("HSOUT",
-		   "TestingOutput");
+		   "TESTINGIF.root");
    
    //Configure the analysis (i.e PROOF, source compilation...)
    TString HSANA=gSystem->Getenv("HSANA");

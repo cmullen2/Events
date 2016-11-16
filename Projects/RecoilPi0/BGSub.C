@@ -1,7 +1,7 @@
-TFile *_filesb = TFile::Open("OutputBeamTimeRun14920/Physics_CBTaggTAPS_14920.root");
+TFile *_filesb = TFile::Open("NoKinBins/Perp/Perp20filesNoKins.root");
 
 void BGSub(){
-	TFile* file = new TFile("BackgroundSubCBTaggTAPS_14920.root","recreate");
+	TFile* file = new TFile("NoKinBins/BGPerp.root","recreate");
 	
 	MakeHist("NoCut");
 
@@ -119,10 +119,10 @@ void MakeHist(TString name){
 	hProtonPromptAngleWCP->Add(hProtonRandomAngleWCP,-0.5);
 	hProtonPromptPhiPWC->Add(hProtonRandomPhiPWC,-0.5);
 	hProtonPromptPhiWC->Add(hProtonRandomPhiWC,-0.5);
-	hProtonPromptPhiWC->Add(hProtonRandomPhiWC,-0.5);
+	hProtonPromptPiPhi->Add(hProtonRandomPiPhi,-0.5);
 	
 	hProtonPromptPiPhiVPhiWC->Add(hProtonRandomPiPhiVPhiWC,-0.5);
-//	hProtonPromptPiPhiVPhiWCP->Add(hProtonRandomPiPhiVPhiWCP,-0.5);
+	hProtonPromptPiPhiVPhiWCP->Add(hProtonRandomPiPhiVPhiWCP,-0.5);
 	hProtonPromptPhiWCVPhiWCP->Add(hProtonRandomPhiWCVPhiWCP,-0.5);
 
 
@@ -138,9 +138,10 @@ void MakeHist(TString name){
 	hNeutronPromptAngleWCP->Add(hNeutronRandomAngleWCP,-0.5);
 	hNeutronPromptPhiPWC->Add(hNeutronRandomPhiPWC,-0.5);
 	hNeutronPromptPhiWC->Add(hNeutronRandomPhiWC,-0.5);
+	hNeutronPromptPiPhi->Add(hNeutronRandomPiPhi,-0.5);
 
 	hNeutronPromptPiPhiVPhiWC->Add(hNeutronRandomPiPhiVPhiWC,-0.5);
-//	hNeutronPromptPiPhiVPhiWCP->Add(hNeutronRandomPiPhiVPhiWCP,-0.5);
+	hNeutronPromptPiPhiVPhiWCP->Add(hNeutronRandomPiPhiVPhiWCP,-0.5);
 	hNeutronPromptPhiWCVPhiWCP->Add(hNeutronRandomPhiWCVPhiWCP,-0.5);
 
 
@@ -161,6 +162,7 @@ void MakeHist(TString name){
     hProtonPromptAngleWCP->Write();     
     hProtonPromptPhiPWC->Write();     
     hProtonPromptPhiWC->Write();     
+    hProtonPromptPiPhi->Write();     
   
     hProtonPromptPiPhiVPhiWC->Write();
     hProtonPromptPiPhiVPhiWCP->Write();
@@ -180,28 +182,29 @@ void MakeHist(TString name){
     hNeutronPromptAngleWCP->Write();
     hNeutronPromptPhiPWC->Write();
     hNeutronPromptPhiWC->Write();
+    hNeutronPromptPiPhi->Write();
 
     hNeutronPromptPiPhiVPhiWC->Write();
     hNeutronPromptPiPhiVPhiWCP->Write();
     hNeutronPromptPhiWCVPhiWCP->Write();
 
-   TCanvas *c1 = new TCanvas("c1","c1",600,400);
-   TH1F* hisP=hProtonPromptAngleWCP;//angleWCProtonProtonPrompt_All"));
-   hisP->Draw();
-   TH1F* hisN=hNeutronPromptAngleWCP;
-   hisP->Scale(11500./27500); //Change for peak height (need to automate)
-   hisN->Draw();
-   hisP->Draw("same");
-   hisP->SetLineColor(kRed);
+//   TCanvas *c1 = new TCanvas("c1","c1",600,400);
+//   TH1F* hisP=hProtonPromptAngleWCP;//angleWCProtonProtonPrompt_All"));
+//   hisP->Draw();
+ //  TH1F* hisN=hNeutronPromptAngleWCP;
+  // hisP->Scale(11500./27500); //Change for peak height (need to automate)
+//   hisN->Draw();
+//   hisP->Draw("same");
+//   hisP->SetLineColor(kRed);
 
-   TCanvas *c2 = new TCanvas("c2","c2",600,400);
-   c2->cd();
+  // TCanvas *c2 = new TCanvas("c2","c2",600,400);
+  // c2->cd();
 
-   hisN->Add(hisP,-1);
-   hisN->Draw();
+ //  hisN->Add(hisP,-1);
+//   hisN->Draw();
 
-   hisN->Write();
-   hisP->Write();
+//   hisN->Write();
+//   hisP->Write();
 
     }
 

@@ -36,6 +36,7 @@
    const Int_t kMaxChamber1Phi = 1;
    const Int_t kMaxProtonCandidate = 1;
    const Int_t kMaxMissingMass = 1;
+   const Int_t kMaxBeamHelicity = 1;
 
 class Recoiler : public TSelector, public THSOutput {
 public :
@@ -92,7 +93,17 @@ public :
    Double_t	   phiProtonWC;
    Double_t	   phiWC;
    Double_t	   TaggedTime_;
-  	   
+   Double_t        BeamHelicity_;
+   Double_t	   ScatteredWCPhiHel1;
+   Double_t	   ScatteredWCPhiHel0; 	   
+   Double_t        thetaProtonWC;
+   Double_t        thetaWC;
+   Double_t        MarkThetadiff;
+   Double_t        MarkPhidiff;
+   Double_t        ScatPhiCut;
+   Double_t        ScatThetaCut;
+
+
 
    // List of branches
    TBranch        *b_Pion_TObject_fUniqueID;   //!
@@ -132,6 +143,7 @@ public :
    TBranch        *b_ProtonCandidate_fE;   //!
    TBranch        *b_MissingMass_;   //!
    TBranch	  *b_TaggedTime_;
+   TBranch        *b_BeamHelicity_;   //!
 
 
 //______________________________________________________________________________
@@ -301,6 +313,7 @@ void Recoiler::Init(TTree *tree)
    fChain->SetBranchAddress("ProtonCandidate.fE", &ProtonCandidate_fE, &b_ProtonCandidate_fE);
    fChain->SetBranchAddress("MissingMass.", &MissingMass_, &b_MissingMass_);
    fChain->SetBranchAddress("TaggedTime.", &TaggedTime_, &b_TaggedTime_);
+   fChain->SetBranchAddress("BeamHelicity.", &BeamHelicity_, &b_BeamHelicity_);
  
 }
 
