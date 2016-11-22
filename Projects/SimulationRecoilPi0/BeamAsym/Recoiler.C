@@ -100,14 +100,6 @@ Bool_t Recoiler::Process(Long64_t entry)
   //Ready to do some analysis here, before the Fill
    
 
-  //The problem is that some of the participants (protons) are identified only from wc and pid hits and hence have no components to their 4vector.
-  // The solution to this is, that when all 4 components are zero, we set up a dummy Tlorentzvector and with the angles from the wc hits probably
-  // from the target centre to wc1 so as not to exclude scattering events. Need to look at Doms function and see what it does with the energy of the 
-  // Proton. Also need to use the dummy variable for the boosting as well as this will be the only one with components in the px py pz.
-  // Doms function doesn't depend upon the energy of the participant at all so the prev value of it effects no one. 
-
- 
-  //std::cout << "here" <<std::endl;
 
   Double_t beamEnergy = Ebeam_;
   TVector3 targetPosition;
@@ -158,13 +150,8 @@ Bool_t Recoiler::Process(Long64_t entry)
   TVector3 pVector2;
 
   chamber1_Vec.SetXYZ(Chamber1_fX,Chamber1_fY,Chamber1_fZ);
-  chamber2_Vec.SetXYZ(Chamber2_fX,Chamber2_fY,Chamber2_fZ); //These are the same.
-  //Problem with getting distinct wire chamber hits!!!
+  chamber2_Vec.SetXYZ(Chamber2_fX,Chamber2_fY,Chamber2_fZ); 
 
-  cout << Chamber1_fX <<" Y  " << Chamber1_fY << " Z " << Chamber1_fZ << endl;
-
-
-  // chamber2_Vec.RotateZ(-1.2*TMath::DegToRad()); //*********MUY IMPORTANTE*******
 
   if (chamber1_Vec.X() > -990 ){
     chamber1Theta  = chamber1_Vec.Theta()*TMath::RadToDeg();
@@ -173,8 +160,6 @@ Bool_t Recoiler::Process(Long64_t entry)
     //These are the vector which will go into Reconstruct. 
     angleWCProton = (pVector1.Angle(pVector2))*TMath::RadToDeg();
  
-    //secondpVec2 = chamber2_Vec - targetPosition;
-    // secondthetaWC = secondpVec2. ; 
   
     thetaProtonWC = (pVector1.Theta())*TMath::RadToDeg();
     phiProtonWC = (pVector1.Phi())*TMath::RadToDeg();
@@ -204,25 +189,6 @@ Bool_t Recoiler::Process(Long64_t entry)
 
 
 
-
-  //if(scatteredTheta >8 && scatteredTheta < 30){
-  //if(BeamHelicity_ == 1) {
-  //ScatteredWCPhiHel1 = scatteredPhi;
-  //ScatteredWCPhiHel0 =-666;
-  //}
-
-  //else{
-  //ScatteredWCPhiHel1 = -666;
-  //ScatteredWCPhiHel0 = scatteredPhi ;
-  //}
-
-  //}
-  //else {
-  //ScatteredWCPhiHel1 = -2000 ;
-  //ScatteredWCPhiHel0 = -2000;
-  //}
-
-
   if(chamber1Theta != -1000){
     MarkThetadiff = thetaWC - thetaProtonWC  ;
     MarkPhidiff = phiWC - phiProtonWC  ;
@@ -236,55 +202,8 @@ Bool_t Recoiler::Process(Long64_t entry)
   }
 
 
-
-  //cout << MarkThetadiff << " Phi " << MarkPhidiff << " ThetaWC " << thetaWC << " thetaProtonWC" << thetaProtonWC  <<endl;
-
-  //if(scatteredTheta >8 && scatteredTheta < 30){
-  //if((MarkThetadiff >5 || MarkThetadiff < -5  )){
-  // && (MarkPhidiff>5 || MarkThetadiff <-5) && (MarkThetadiff != -1000 || MarkPhidiff != -1000 )     ){
-  //if (MarkPhidiff >5 || MarkPhidiff <-5){
-  if (MarkPhidiff != -1000 && MarkThetadiff != -1000){
-
-    if(MarkThetadiff >3 ||   MarkThetadiff < -3  ){
-      //cout << MarkThetadiff << endl;
-
-      //Swapped around the if and so what scatPhiCut should equal
-      ScatPhiCut = -2000  ;
-      ScatThetaCut = -2000;
-
-      //ScatPhiCut = scatteredPhi ;
-      //ScatThetaCut = scatteredTheta;
-
-
-      if(BeamHelicity_ == 1) {
-	ScatteredWCPhiHel1 = scatteredPhi;
-	ScatteredWCPhiHel0 =-666;
-      }
-
-      else{
-	ScatteredWCPhiHel1 = -666;
-	ScatteredWCPhiHel0 = scatteredPhi ;
-      }
-
-    }
-  }
-  //}
-  else {
-    ScatteredWCPhiHel1 = -2000 ;
-    ScatteredWCPhiHel0 = -2000;
-    ScatPhiCut = scatteredPhi;
-    ScatThetaCut = scatteredTheta;
-  }
-
-
-
-
-
-
-
-
-
-  Double_t Esum = ESum_;
+//Both ESum and tagged time are both zero from simulation
+  Double_t Esum = ESum_; 
   Double_t TagTime = TaggedTime_;
 
   Int_t kinBin=GetKinBin(Ebeam_,pionCMAngle);//if fHisbins is defined need to give this meaningful arguments
@@ -308,6 +227,7 @@ Bool_t Recoiler::Process(Long64_t entry)
     }
 
 
+//*************The Tagged time cuts won't work for simulation
 
     // FillHistograms("Cut1",kinBin);
     if (TagTime < 25 && TagTime > -25){
@@ -434,21 +354,21 @@ void Recoiler::FillHistograms(TString sCut,Int_t bin){
   //Fill histogram
   // e.g. FindHist("Mp1")->Fill(fp1->M());
 
-  //  FindHist("InvMass")->Fill(Inv_Mass_Pion_);
-  //  FindHist("MissingMass")->Fill(MissingMass_);
-  //  FindHist("pionCMAngle")->Fill(pionCMAngle);
-  //  ((TH2F*)FindHist("pionCMAngleVsE"))->Fill(pionCMAngle,Ebeam_);
+    FindHist("InvMass")->Fill(Inv_Mass_Pion_);
+    FindHist("MissingMass")->Fill(MissingMass_);
+    FindHist("pionCMAngle")->Fill(pionCMAngle);
+    ((TH2F*)FindHist("pionCMAngleVsE"))->Fill(pionCMAngle,Ebeam_);
   ((TH2F*)FindHist("ScatteredPhiVWCTheta"))->Fill(scatteredPhi,chamber1Theta);
-  //  ((TH2F*)FindHist("pionPhiVsE"))->Fill(p4Pion.Phi()*TMath::RadToDeg(),Ebeam_);
+    ((TH2F*)FindHist("pionPhiVsE"))->Fill(p4Pion.Phi()*TMath::RadToDeg(),Ebeam_);
   ((TH2F*)FindHist("ScatteredPhiVScatTheta"))->Fill(scatteredPhi,scatteredTheta);
-  //  FindHist("angleWCProton")->Fill(angleWCProton);
-  //  FindHist("phiProtonWC")->Fill(phiProtonWC);
-  //  FindHist("phiWC")->Fill(phiWC);
-  //  FindHist("pionPhi")->Fill(p4Pion.Phi()*TMath::RadToDeg());
+    FindHist("angleWCProton")->Fill(angleWCProton);
+    FindHist("phiProtonWC")->Fill(phiProtonWC);
+    FindHist("phiWC")->Fill(phiWC);
+    FindHist("pionPhi")->Fill(p4Pion.Phi()*TMath::RadToDeg());
 
-  //  ((TH1F*)FindHist("pionPhiVsphiWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiWC);
-  //  ((TH1F*)FindHist("pionPhiVsphiProtonWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiProtonWC);
-  //  ((TH1F*)FindHist("phiWCVsphiProtonWC"))->Fill(phiWC - phiProtonWC);
+    ((TH1F*)FindHist("pionPhiVsphiWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiWC);
+    ((TH1F*)FindHist("pionPhiVsphiProtonWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiProtonWC);
+    ((TH1F*)FindHist("phiWCVsphiProtonWC"))->Fill(phiWC - phiProtonWC);
 
 
 
@@ -461,18 +381,18 @@ void Recoiler::FillHistograms(TString sCut,Int_t bin){
 
   //  FindHist("MarkThetadiff")->Fill(MarkThetadiff);
   //  FindHist("MarkPhidiff")->Fill(MarkPhidiff);
-  //  FindHist("thetaWC")->Fill(thetaWC);
-  //  FindHist("phiWCagain")->Fill(phiWC);
-  //  FindHist("thetaProtonWC")->Fill(thetaProtonWC);
-  //  FindHist("phiProtonWCagain")->Fill(phiProtonWC);
+    FindHist("thetaWC")->Fill(thetaWC);
+    FindHist("phiWCagain")->Fill(phiWC);
+    FindHist("thetaProtonWC")->Fill(thetaProtonWC);
+    FindHist("phiProtonWCagain")->Fill(phiProtonWC);
  
-  ((TH2F*)FindHist("MarkThetadiffVsMarkPhidiff"))->Fill(MarkThetadiff,MarkPhidiff);
+//  ((TH2F*)FindHist("MarkThetadiffVsMarkPhidiff"))->Fill(MarkThetadiff,MarkPhidiff);
 
-  ((TH2F*)FindHist("ScatPhiCutVsScatThetaCut"))->Fill(ScatPhiCut,ScatThetaCut);
+//  ((TH2F*)FindHist("ScatPhiCutVsScatThetaCut"))->Fill(ScatPhiCut,ScatThetaCut);
 
-  //  ((TH1F*)FindHist("pVector2X"))->Fill(pVector2.X());
-  //  ((TH1F*)FindHist("pVector2Y"))->Fill(pVector2.Y());
-  //  ((TH1F*)FindHist("pVector2Z"))->Fill(pVector2.X());
+    ((TH1F*)FindHist("pVector2X"))->Fill(pVector2.X());
+    ((TH1F*)FindHist("pVector2Y"))->Fill(pVector2.Y());
+    ((TH1F*)FindHist("pVector2Z"))->Fill(pVector2.X());
 }
 
 
