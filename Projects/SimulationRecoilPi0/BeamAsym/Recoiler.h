@@ -102,7 +102,9 @@ public :
    Double_t        MarkPhidiff;
    Double_t        ScatPhiCut;
    Double_t        ScatThetaCut;
-
+   Double_t	   TestPhidiff;
+   Double_t	   TestPidPhi;
+   Double_t	   TestCham1Phi;
 
 
    // List of branches

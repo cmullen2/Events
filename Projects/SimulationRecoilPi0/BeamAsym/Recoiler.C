@@ -59,18 +59,10 @@ void Recoiler::SlaveBegin(TTree * /*tree*/)
   //  THSHisto::LoadCut("Cut1");
   THSHisto::LoadCut("ProtonPrompt");
   THSHisto::LoadCut("NeutronPrompt");
-  THSHisto::LoadCut("ProtonRandom");
-  THSHisto::LoadCut("NeutronRandom");
+  THSHisto::LoadCut("AllTest"); //TESTING CODE
+  // THSHisto::LoadCut("ProtonRandom");	//No tagged time in simulation so cannot distinguish random and prompt
+  // THSHisto::LoadCut("NeutronRandom");
   
-  // THSHisto::LoadCut("ProtonEsum>60");
-  // THSHisto::LoadCut("NeutronEsum>60");
-  // THSHisto::LoadCut("ProtonEsum>80");
-  // THSHisto::LoadCut("NeutronEsum>80");
-  // THSHisto::LoadCut("ProtonEsum>100");
-  // THSHisto::LoadCut("NeutronEsum>100");
-  // THSHisto::LoadCut("ProtonEsum>120");
-  // THSHisto::LoadCut("NeutronEsum>120");
-  //THSHisto::LoadCut("pionCMAngle");
 
 
   THSHisto::LoadHistograms();
@@ -103,7 +95,7 @@ Bool_t Recoiler::Process(Long64_t entry)
 
   Double_t beamEnergy = Ebeam_;
   TVector3 targetPosition;
-  targetPosition.SetXYZ(0.,0.,0);   //NEEDS CHANGING since target cell is moved like -6.5cm, see wc.dat files see a2geant.
+  targetPosition.SetXYZ(0.,0.,-7.0);   //NEEDS CHANGING since target cell is moved like -6.5cm, see wc.dat files see a2geant.
 
   
   p4Pion.SetPxPyPzE(Pion_fP_fX,Pion_fP_fY,Pion_fP_fZ,Pion_fE);  
@@ -186,23 +178,27 @@ Bool_t Recoiler::Process(Long64_t entry)
 
 
   }
+  //TESTING CODE
+  TestPhidiff =Phidiff_ ;
+  TestPidPhi = PIDPhi_ ;
+  TestCham1Phi =Chamber1Phi_ ;
+  FillHistograms("AllTest",0);
+
+  //Not currently used for simulation
+  // if(chamber1Theta != -1000){
+  //   MarkThetadiff = thetaWC - thetaProtonWC  ;
+  //   MarkPhidiff = phiWC - phiProtonWC  ;
+  // }
+
+  // else{
+
+  //   MarkThetadiff = -1000;
+  //   MarkPhidiff = -1000;
+
+  // }
 
 
-
-  if(chamber1Theta != -1000){
-    MarkThetadiff = thetaWC - thetaProtonWC  ;
-    MarkPhidiff = phiWC - phiProtonWC  ;
-  }
-
-  else{
-
-    MarkThetadiff = -1000;
-    MarkPhidiff = -1000;
-
-  }
-
-
-//Both ESum and tagged time are both zero from simulation
+  //Both ESum and tagged time are both zero from simulation
   Double_t Esum = ESum_; 
   Double_t TagTime = TaggedTime_;
 
@@ -212,60 +208,59 @@ Bool_t Recoiler::Process(Long64_t entry)
   if (chamber1Theta>-1000){
 
     //PionPhi cuts
-    if ( ((-p4Pion).Phi()*TMath::RadToDeg()-phiWC) < -30 || ((-p4Pion).Phi()*TMath::RadToDeg() -phiWC) > 30    ){
-      return kTRUE;
-    }
+    // if ( ((-p4Pion).Phi()*TMath::RadToDeg()-phiWC) < -30 || ((-p4Pion).Phi()*TMath::RadToDeg() -phiWC) > 30    ){
+    //  return kTRUE;
+    // }
 
 
-    if (  ((-p4Pion).Phi()*TMath::RadToDeg() -phiProtonWC) < -30 ||  ((-p4Pion).Phi()*TMath::RadToDeg() -phiProtonWC)  > 30  ){
-      return kTRUE;
-    }
+    //    if (  ((-p4Pion).Phi()*TMath::RadToDeg() -phiProtonWC) < -30 ||  ((-p4Pion).Phi()*TMath::RadToDeg() -phiProtonWC)  > 30  ){
+    // return kTRUE;
+    // }
 
-    if ( (phiWC - phiProtonWC) < -50 || (phiWC - phiProtonWC) > 50    ){
+    // if ( (phiWC - phiProtonWC) < -50 || (phiWC - phiProtonWC) > 50    ){
+    //   return kTRUE;
+    //}
 
-      return kTRUE;
-    }
 
-
-//*************The Tagged time cuts won't work for simulation
+    //*************The Tagged time cuts won't work for simulation as tagged time histo is all zero
 
     // FillHistograms("Cut1",kinBin);
-    if (TagTime < 25 && TagTime > -25){
+    //    if (TagTime < 25 && TagTime > -25){
 
-      if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
+    if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
 
-	//   FillHistograms("ProtonPrompt",kinBin);
-	FillHistograms("ProtonPrompt",0);
-
-
-      }//pidphidiff if close
-
-      else{
-	// FillHistograms("NeutronPrompt",kinBin);
-	FillHistograms("NeutronPrompt",0);
+      //   FillHistograms("ProtonPrompt",kinBin);
+      FillHistograms("ProtonPrompt",0);
 
 
-      } //pid phi else close
+    }//pidphidiff if close
 
-    } // TagTime if close 
-
-    else if(TagTime < 90 && TagTime > 40 || TagTime > -90 && TagTime < -40 ){
-      if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
-
-	//   FillHistograms("ProtonRandom",kinBin);
-	FillHistograms("ProtonRandom",0);
+    else{
+      // FillHistograms("NeutronPrompt",kinBin);
+      FillHistograms("NeutronPrompt",0);
 
 
-      }//pidphidiff if close
+    } //pid phi else close
+
+    //  } // TagTime if close 
+
+    //   else if(TagTime < 90 && TagTime > 40 || TagTime > -90 && TagTime < -40 ){
+    //      if (pidPhiDiff < 15 && pidPhiDiff > -1){		//15 (14.4 actually) degrees is pid element separation.
+
+    //   FillHistograms("ProtonRandom",kinBin);
+    //	FillHistograms("ProtonRandom",0);
 
 
-      else{
-	// FillHistograms("NeutronRandom",kinBin);
-	FillHistograms("NeutronRandom",0);
+    //      }//pidphidiff if close
 
-      } // pidphi else close
 
-    }// TagTime else close
+    //      else{
+    // FillHistograms("NeutronRandom",kinBin);
+    //	FillHistograms("NeutronRandom",0);
+
+    //      } // pidphi else close
+
+    // }// TagTime else close
 
   } //close chamber1theta
 
@@ -305,21 +300,28 @@ void Recoiler::HistogramList(TString sLabel){
   // e.g fOutput->Add(MapHist(new TH1F("Mp1"+sLabel,"M_{p1}"+sLabel,100,0,2)));
   //end of histogram list
 
-  //  fOutput->Add(MapHist(new TH1F("InvMass"+sLabel,"M_{Inv}"+sLabel,100,100,250)));
-  //  fOutput->Add(MapHist(new TH1F("MissingMass"+sLabel,"M_{mass}"+sLabel,100,1700,2100)));
-  //  fOutput->Add(MapHist(new TH1F("pionCMAngle"+sLabel,"Pion_{CMAngle}"+sLabel,1000,0,250)));
-  //  fOutput->Add(MapHist(new TH2F("pionCMAngleVsE"+sLabel,"Pion_{CMAngle}VsE"+sLabel,100,0,180,100,0,1500)));  //6 rather than 3 ints. see browser
-  fOutput->Add(MapHist(new TH2F("ScatteredPhiVWCTheta"+sLabel,"PhiVsTheta_{ScatteredVsWC}"+sLabel,1000,-180,180,1000,0,180)));  
-  //  fOutput->Add(MapHist(new TH2F("pionPhiVsE"+sLabel,"pionPhiVsE"+sLabel,1000,-180,180,1000,0,1500))); 
-  fOutput->Add(MapHist(new TH2F("ScatteredPhiVScatTheta"+sLabel,"PhiVsTheta_{Scattered}"+sLabel,1000,-180,180,1000,0,180)));  
-  //  fOutput->Add(MapHist(new TH1F("angleWCProton"+sLabel,"angleWCProton"+sLabel,100,0,180)));
-  //  fOutput->Add(MapHist(new TH1F("phiProtonWC"+sLabel,"Phi_{ProtonUsingWC1}"+sLabel,100,-180,180)));
-  //  fOutput->Add(MapHist(new TH1F("phiWC"+sLabel,"phi_{WC}"+sLabel,100,-180,180)));
-  //  fOutput->Add(MapHist(new TH1F("pionPhi"+sLabel,"pionPhi"+sLabel,100,-180,180))); 
+  fOutput->Add(MapHist(new TH1F("TestPhidiff"+sLabel,"TestPhidiff"+sLabel,1000,-360,360)));
+  fOutput->Add(MapHist(new TH1F("TestPidPhi"+sLabel,"TestPidPhi"+sLabel,1000,-360,360)));
+  fOutput->Add(MapHist(new TH1F("TestCham1Phi"+sLabel,"TestCham1Phi"+sLabel,1000,-360,360)));
+  fOutput->Add(MapHist(new TH2F("PidPhiVCham1Phi"+sLabel,"PidPhiVCham1Phi"+sLabel,1000,-360,360,1000,-360,360)));
+  fOutput->Add(MapHist(new TH2F("NEWPhiWCVPhiProtonWC"+sLabel,"NEWPhiWCVPhiProtonWC"+sLabel,1000,-360,360,1000,-360,360)));
 
-  //  fOutput->Add(MapHist(new TH1F("pionPhiVsphiWC"+sLabel,"pionPhiVsphiWC"+sLabel,1000,-180,180))); 
-  //  fOutput->Add(MapHist(new TH1F("pionPhiVsphiProtonWC"+sLabel,"pionPhiVsphiProtonWC"+sLabel,1000,-180,180))); 
-  //  fOutput->Add(MapHist(new TH1F("phiWCVsphiProtonWC"+sLabel,"phiWCVsphiProtonWC"+sLabel,1000,-180,180))); 
+
+  fOutput->Add(MapHist(new TH1F("InvMass"+sLabel,"M_{Inv}"+sLabel,100,100,250)));
+  fOutput->Add(MapHist(new TH1F("MissingMass"+sLabel,"M_{mass}"+sLabel,100,1700,2100)));
+  fOutput->Add(MapHist(new TH1F("pionCMAngle"+sLabel,"Pion_{CMAngle}"+sLabel,1000,0,250)));
+  fOutput->Add(MapHist(new TH2F("pionCMAngleVsE"+sLabel,"Pion_{CMAngle}VsE"+sLabel,100,0,180,100,0,1500)));  //6 rather than 3 ints. see browser
+  fOutput->Add(MapHist(new TH2F("ScatteredPhiVWCTheta"+sLabel,"PhiVsTheta_{ScatteredVsWC}"+sLabel,1000,-180,180,1000,0,180)));  
+  fOutput->Add(MapHist(new TH2F("pionPhiVsE"+sLabel,"pionPhiVsE"+sLabel,1000,-180,180,1000,0,1500))); 
+  fOutput->Add(MapHist(new TH2F("ScatteredPhiVScatTheta"+sLabel,"PhiVsTheta_{Scattered}"+sLabel,1000,-180,180,1000,0,180)));  
+  fOutput->Add(MapHist(new TH1F("angleWCProton"+sLabel,"angleWCProton"+sLabel,100,0,180)));
+  fOutput->Add(MapHist(new TH1F("phiProtonWC"+sLabel,"Phi_{ProtonUsingWC1}"+sLabel,100,-180,180)));
+  fOutput->Add(MapHist(new TH1F("phiWC"+sLabel,"phi_{WC}"+sLabel,100,-180,180)));
+  fOutput->Add(MapHist(new TH1F("pionPhi"+sLabel,"pionPhi"+sLabel,100,-180,180))); 
+
+  fOutput->Add(MapHist(new TH1F("pionPhiVsphiWC"+sLabel,"pionPhiVsphiWC"+sLabel,1000,-180,180))); 
+  fOutput->Add(MapHist(new TH1F("pionPhiVsphiProtonWC"+sLabel,"pionPhiVsphiProtonWC"+sLabel,1000,-180,180))); 
+  fOutput->Add(MapHist(new TH1F("phiWCVsphiProtonWC"+sLabel,"phiWCVsphiProtonWC"+sLabel,1000,-180,180))); 
 
 
   // fOutput->Add(MapHist(new TH1F("ScatteredNucleonPhiHel1"+sLabel,"ScatteredNucleonPhiHel1"+sLabel,1000,-180,180))); 
@@ -330,19 +332,22 @@ void Recoiler::HistogramList(TString sLabel){
 
   //  fOutput->Add(MapHist(new TH1F("MarkThetadiff"+sLabel,"MarkThetadiff"+sLabel,20,-200,200))); 
   //  fOutput->Add(MapHist(new TH1F("MarkPhidiff"+sLabel,"MarkPhidiff"+sLabel,20,-50,50))); 
-  //  fOutput->Add(MapHist(new TH1F("thetaWC"+sLabel,"thetaWC"+sLabel,20,0,180))); 
-  //  fOutput->Add(MapHist(new TH1F("phiWCagain"+sLabel,"phiWCagain"+sLabel,20,-180,180))); 
-  //  fOutput->Add(MapHist(new TH1F("thetaProtonWC"+sLabel,"thetaProtonWC"+sLabel,20,0,180))); 
-  //  fOutput->Add(MapHist(new TH1F("phiProtonWCagain"+sLabel,"phiProtonWCagain"+sLabel,20,-180,180))); 
+  fOutput->Add(MapHist(new TH1F("thetaWC"+sLabel,"thetaWC"+sLabel,20,0,180))); 
+  fOutput->Add(MapHist(new TH1F("phiWCagain"+sLabel,"phiWCagain"+sLabel,20,-180,180))); 
+  fOutput->Add(MapHist(new TH1F("thetaProtonWC"+sLabel,"thetaProtonWC"+sLabel,20,0,180))); 
+  fOutput->Add(MapHist(new TH1F("phiProtonWCagain"+sLabel,"phiProtonWCagain"+sLabel,20,-180,180))); 
 
-  fOutput->Add(MapHist(new TH2F("MarkThetadiffVsMarkPhidiff"+sLabel,"Thetadiff_{Mark}VsPhidiff_{Mark}"+sLabel,1000,-180,180,1000,-60,60)));  //6 rather than 3 ints. see browser
+  //fOutput->Add(MapHist(new TH2F("MarkThetadiffVsMarkPhidiff"+sLabel,"Thetadiff_{Mark}VsPhidiff_{Mark}"+sLabel,1000,-180,180,1000,-60,60)));  //6 rather than 3 ints. see browser
 
-  fOutput->Add(MapHist(new TH2F("ScatPhiCutVsScatThetaCut"+sLabel,"ScatPhiVsScatTheta"+sLabel,1000,-180,180,1000,0,180)));  //6 rather than 3 ints. see browser
+  //fOutput->Add(MapHist(new TH2F("ScatPhiCutVsScatThetaCut"+sLabel,"ScatPhiVsScatTheta"+sLabel,1000,-180,180,1000,0,180)));  //6 rather than 3 ints. see browser
 
 
-  //  fOutput->Add(MapHist(new TH1F("pVector2X"+sLabel,"pVector2X"+sLabel,1000,-400,400))); 
-  //  fOutput->Add(MapHist(new TH1F("pVector2Y"+sLabel,"pVector2Y"+sLabel,1000,-400,400))); 
-  //  fOutput->Add(MapHist(new TH1F("pVector2Z"+sLabel,"pVector2Z"+sLabel,1000,-400,400))); 
+  //    fOutput->Add(MapHist(new TH1F("pVector2X"+sLabel,"pVector2X"+sLabel,1000,-400,400))); 
+  //    fOutput->Add(MapHist(new TH1F("pVector2Y"+sLabel,"pVector2Y"+sLabel,1000,-400,400))); 
+  //   fOutput->Add(MapHist(new TH1F("pVector2Z"+sLabel,"pVector2Z"+sLabel,1000,-400,400))); 
+
+  //Simulation addition for Scattered Asymmetries
+  fOutput->Add(MapHist(new TH1F("ScatteredPhi"+sLabel,"ScatteredPhi"+sLabel,100,-180,180)));
 
 
   TDirectory::AddDirectory(kTRUE); //back to normal
@@ -354,21 +359,32 @@ void Recoiler::FillHistograms(TString sCut,Int_t bin){
   //Fill histogram
   // e.g. FindHist("Mp1")->Fill(fp1->M());
 
-    FindHist("InvMass")->Fill(Inv_Mass_Pion_);
-    FindHist("MissingMass")->Fill(MissingMass_);
-    FindHist("pionCMAngle")->Fill(pionCMAngle);
-    ((TH2F*)FindHist("pionCMAngleVsE"))->Fill(pionCMAngle,Ebeam_);
-  ((TH2F*)FindHist("ScatteredPhiVWCTheta"))->Fill(scatteredPhi,chamber1Theta);
-    ((TH2F*)FindHist("pionPhiVsE"))->Fill(p4Pion.Phi()*TMath::RadToDeg(),Ebeam_);
-  ((TH2F*)FindHist("ScatteredPhiVScatTheta"))->Fill(scatteredPhi,scatteredTheta);
-    FindHist("angleWCProton")->Fill(angleWCProton);
-    FindHist("phiProtonWC")->Fill(phiProtonWC);
-    FindHist("phiWC")->Fill(phiWC);
-    FindHist("pionPhi")->Fill(p4Pion.Phi()*TMath::RadToDeg());
 
-    ((TH1F*)FindHist("pionPhiVsphiWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiWC);
-    ((TH1F*)FindHist("pionPhiVsphiProtonWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiProtonWC);
-    ((TH1F*)FindHist("phiWCVsphiProtonWC"))->Fill(phiWC - phiProtonWC);
+  FindHist("TestPhidiff")->Fill(TestPhidiff);
+  FindHist("TestPidPhi")->Fill(TestPidPhi);
+  FindHist("TestCham1Phi")->Fill(TestCham1Phi);
+  ((TH2F*)FindHist("PidPhiVCham1Phi"))->Fill(TestPidPhi,TestCham1Phi);
+  ((TH2F*)FindHist("NEWPhiWCVPhiProtonWC"))->Fill(phiWC,phiProtonWC);
+  //  ((TH2F*)FindHist("ScatteredPhiVWCTheta"))->Fill(scatteredPhi,chamber1Theta);
+
+
+
+
+  FindHist("InvMass")->Fill(Inv_Mass_Pion_);
+  FindHist("MissingMass")->Fill(MissingMass_);
+  FindHist("pionCMAngle")->Fill(pionCMAngle);
+  ((TH2F*)FindHist("pionCMAngleVsE"))->Fill(pionCMAngle,Ebeam_);
+  ((TH2F*)FindHist("ScatteredPhiVWCTheta"))->Fill(scatteredPhi,chamber1Theta);
+  ((TH2F*)FindHist("pionPhiVsE"))->Fill(p4Pion.Phi()*TMath::RadToDeg(),Ebeam_);
+  ((TH2F*)FindHist("ScatteredPhiVScatTheta"))->Fill(scatteredPhi,scatteredTheta);
+  FindHist("angleWCProton")->Fill(angleWCProton);
+  FindHist("phiProtonWC")->Fill(phiProtonWC);
+  FindHist("phiWC")->Fill(phiWC);
+  FindHist("pionPhi")->Fill(p4Pion.Phi()*TMath::RadToDeg());
+
+  ((TH1F*)FindHist("pionPhiVsphiWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiWC);
+  ((TH1F*)FindHist("pionPhiVsphiProtonWC"))->Fill((-p4Pion).Phi()*TMath::RadToDeg() - phiProtonWC);
+  ((TH1F*)FindHist("phiWCVsphiProtonWC"))->Fill(phiWC - phiProtonWC);
 
 
 
@@ -381,19 +397,24 @@ void Recoiler::FillHistograms(TString sCut,Int_t bin){
 
   //  FindHist("MarkThetadiff")->Fill(MarkThetadiff);
   //  FindHist("MarkPhidiff")->Fill(MarkPhidiff);
-    FindHist("thetaWC")->Fill(thetaWC);
-    FindHist("phiWCagain")->Fill(phiWC);
-    FindHist("thetaProtonWC")->Fill(thetaProtonWC);
-    FindHist("phiProtonWCagain")->Fill(phiProtonWC);
+  FindHist("thetaWC")->Fill(thetaWC);
+  FindHist("phiWCagain")->Fill(phiWC);
+  FindHist("thetaProtonWC")->Fill(thetaProtonWC);
+  FindHist("phiProtonWCagain")->Fill(phiProtonWC);
  
-//  ((TH2F*)FindHist("MarkThetadiffVsMarkPhidiff"))->Fill(MarkThetadiff,MarkPhidiff);
+  //  ((TH2F*)FindHist("MarkThetadiffVsMarkPhidiff"))->Fill(MarkThetadiff,MarkPhidiff);
 
-//  ((TH2F*)FindHist("ScatPhiCutVsScatThetaCut"))->Fill(ScatPhiCut,ScatThetaCut);
+  //  ((TH2F*)FindHist("ScatPhiCutVsScatThetaCut"))->Fill(ScatPhiCut,ScatThetaCut);
 
-    ((TH1F*)FindHist("pVector2X"))->Fill(pVector2.X());
-    ((TH1F*)FindHist("pVector2Y"))->Fill(pVector2.Y());
-    ((TH1F*)FindHist("pVector2Z"))->Fill(pVector2.X());
+  //    ((TH1F*)FindHist("pVector2X"))->Fill(pVector2.X());
+  //    ((TH1F*)FindHist("pVector2Y"))->Fill(pVector2.Y());
+  //    ((TH1F*)FindHist("pVector2Z"))->Fill(pVector2.X());
+
+  //Simulation addition for calculating Scattered Asymmetries when file only contains one helicity(as simulation always will)   
+  ((TH1F*)FindHist("ScatteredPhi"))->Fill(scatteredPhi);
+
 }
+
 
 
 
